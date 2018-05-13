@@ -20,10 +20,10 @@ import java.net.URLEncoder;
 @Slf4j
 public class GoogleWebSearchUtils {
 
-    public static final String KEY = "AIzaSyDCor3uGkrFUYIGkJOX0PlP653WHrQxuL4";
-    public static final String CX = "012883174227260507803:7-irmnpcsci";
+    private static final String KEY = "AIzaSyDCor3uGkrFUYIGkJOX0PlP653WHrQxuL4";
+    private static final String CX = "012883174227260507803:7-irmnpcsci";
 
-    public static final String SS = "https://www.googleapis.com/customsearch/v1" +
+    private static final String SS = "https://www.googleapis.com/customsearch/v1" +
             "?q=%s&num=%s&start=%s&key=" + KEY + "&cx=" + CX + "&alt=json";
 
 
@@ -36,7 +36,10 @@ public class GoogleWebSearchUtils {
         }
 
         int startIndex = (page - 1) * count + 1;
-
+        try {
+            searchItem = URLEncoder.encode(searchItem, "UTF-8");
+        } catch (Exception ignore) {
+        }
         String url = String.format(SS, searchItem, count, startIndex);
         log.info("search url:{}", url);
         try {
@@ -48,9 +51,16 @@ public class GoogleWebSearchUtils {
                 log.warn("search response is null, url:{}", url);
                 return null;
             }
+
             ResponseBody body = response.body();
             if (body == null) {
                 log.warn("search responseBody is null, url:{}", url);
+                return null;
+            }
+            String bodyStr = body.string();
+            System.out.println(bodyStr);
+            if (!response.isSuccessful()) {
+                log.warn("search isSuccessful is false, url:{}, body:{}", url, body);
                 return null;
             }
             return JSON.parseObject(body.string(), GoogleResult.class);

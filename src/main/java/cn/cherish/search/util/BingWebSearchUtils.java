@@ -1,94 +1,77 @@
 package cn.cherish.search.util;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
-import javax.net.ssl.HttpsURLConnection;
-import java.io.InputStream;
-import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
-/*
- * Gson: https://github.com/google/gson
- * Maven info:
- *     groupId: com.google.code.gson
- *     artifactId: gson
- *     version: 2.8.1
- *
- * Once you have compiled or downloaded gson-2.8.1.jar, assuming you have placed it in the
- * same folder as this file (BingWebSearch.java), you can compile and run this program at
- * the command line as follows.
- *
- * javac BingWebSearch.java -classpath .;gson-2.8.1.jar -encoding UTF-8
- * java -cp .;gson-2.8.1.jar BingWebSearch
- */
-
+@Slf4j
 public class BingWebSearchUtils {
 
-// ***********************************************
-// *** Update or verify the following values. ***
-// **********************************************
-
     // Replace the subscriptionKey string value with your valid subscription key.
-    static String subscriptionKey = "9c63e3082a61475ea5fbe26aa96eff62";
+    static String subscriptionKey = "71a51a5e034346c6aba829e9b36186fa";
 
     // Verify the endpoint URI.  At this writing, only one endpoint is used for Bing
     // search APIs.  In the future, regional endpoints may be available.  If you
     // encounter unexpected authorization errors, double-check this value against
     // the endpoint for your Bing Web search instance in your Azure dashboard.
     static String host = "https://api.cognitive.microsoft.com";
-    static String path = "/bing/v7.0/search";
+    static final String SS = host + "/bing/v7.0/search?responseFilter=Webpages" +
+            "&q=%s&count=%s&offset=%s";
 
-    static String searchTerm = "GG";
 
-    public static SearchResults SearchWeb (String searchQuery) throws Exception {
-        // construct URL of search request (endpoint + query string)
-        URL url = new URL(host + path + "?q=" +  URLEncoder.encode(searchQuery, "UTF-8"));
-        HttpsURLConnection connection = (HttpsURLConnection)url.openConnection();
-        connection.setRequestProperty("Ocp-Apim-Subscription-Key", subscriptionKey);
-
-        // receive JSON body
-        InputStream stream = connection.getInputStream();
-        String response = new Scanner(stream).useDelimiter("\\A").next();
-
-        // construct result object for return
-        SearchResults results = new SearchResults(new HashMap<>(), response);
-
-        // extract Bing-related HTTP headers
-        Map<String, List<String>> headers = connection.getHeaderFields();
-        for (String header : headers.keySet()) {
-            if (header == null) continue;      // may have null key
-            if (header.startsWith("BingAPIs-") || header.startsWith("X-MSEdge-")) {
-                results.relevantHeaders.put(header, headers.get(header).get(0));
-            }
+    public static BingResult search(String searchItem, int page, int count) {
+        if (page < 1) {
+            page = 1;
+        }
+        if (count < 0) {
+            count = 10;
         }
 
-        stream.close();
-        return results;
+        int offset = (page - 1) * count;
+        try {
+            searchItem = URLEncoder.encode(searchItem, "UTF-8");
+        } catch (Exception ignore) {
+        }
+        String url = String.format(SS, searchItem, count, offset);
+
+        log.info("search url:{}", url);
+        try {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .header("Ocp-Apim-Subscription-Key", subscriptionKey)
+                    .get()
+                    .build();
+
+            OkHttpClient okHttpClient = OkHttpClientUtils.defaultClient();
+
+            Response response = okHttpClient.newCall(request).execute();
+            if (response == null) {
+                log.warn("search response is null, url:{}", url);
+                return null;
+            }
+
+            ResponseBody body = response.body();
+            if (body == null) {
+                log.warn("search responseBody is null, url:{}", url);
+                return null;
+            }
+            String bodyStr = body.string();
+            System.out.println(bodyStr);
+            if (!response.isSuccessful()) {
+                log.warn("search isSuccessful is false, url:{}, body:{}", url, body);
+                return null;
+            }
+            return JSON.parseObject(bodyStr, BingResult.class);
+        } catch (Exception e) {
+            log.error("search error, url:{}", url, e);
+        }
+        return null;
     }
 
-    // pretty-printer for JSON; uses GSON parser to parse and re-serialize
-    public static String prettify(String json_text) {
-        JsonParser parser = new JsonParser();
-        JsonObject json = parser.parse(json_text).getAsJsonObject();
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        return gson.toJson(json);
-    }
 
-}
-
-// Container class for search results encapsulates relevant headers and JSON data
-class SearchResults{
-    HashMap<String, String> relevantHeaders;
-    String jsonResponse;
-    SearchResults(HashMap<String, String> headers, String json) {
-        relevantHeaders = headers;
-        jsonResponse = json;
-    }
 }
