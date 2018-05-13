@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <configuration>
 
-    <appender name="console" class="ch.qos.logback.core.ConsoleApender">
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%cyan(%date{HH:mm:ss.SSS}) %magenta() %highlight(%-5level) %blue([%file : %line])
                 %boldGreen(%msg%n)
