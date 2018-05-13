@@ -7,6 +7,11 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.io.*;
+import java.net.URL;
+import java.net.URLEncoder;
+
 /**
  * @author Cherish
  * @version 1.0
@@ -55,9 +60,34 @@ public class GoogleWebSearchUtils {
         return null;
     }
 
-    public static void main(String[] args) {
-        search("GG", 1, 10);
-    }
+    public static Object searchWeb(String searchItem, int page, int count) throws Exception {
+        if (page < 1) {
+            page = 1;
+        }
+        if (count < 0) {
+            count = 10;
+        }
 
+        int startIndex = (page - 1) * count + 1;
+
+        String urlStr = String.format(SS, URLEncoder.encode(searchItem, "UTF-8"), count, startIndex);
+        log.info("search url:{}", urlStr);
+        // construct URL of search request (endpoint + query string)
+        URL url = new URL(urlStr);
+
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+
+        // receive JSON body
+        InputStream stream = connection.getInputStream();
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
+
+        String s = br.readLine();
+        System.out.println("s = " + s);
+
+        br.close();
+        stream.close();
+        return null;
+    }
 
 }
