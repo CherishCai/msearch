@@ -3,6 +3,7 @@ package cn.cherish.search.web;
 
 import cn.cherish.search.util.SearchResult;
 import cn.cherish.search.util.SearchUtils;
+import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
  * @version 1.0
  * @date 2018/5/13 14:46
  */
+@Api("搜索相关接口")
 @RestController
 @RequestMapping("/search")
 @CrossOrigin("*")

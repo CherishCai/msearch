@@ -1,5 +1,7 @@
 package cn.cherish.search.util;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ public class SearchUtils {
         List<SearchResult.Item> items = new ArrayList<>();
         long total = 0L;
 
+        // 处理Google搜索结果
         GoogleResult googleResult = GoogleWebSearchUtils.search(searchItem, page, count);
         if (googleResult != null) {
             try {
@@ -34,7 +37,7 @@ public class SearchUtils {
             items.addAll(collect);
         }
 
-
+        // 处理必应搜索结果
         BingResult bingResult = BingWebSearchUtils.search(searchItem, page, count);
         if (bingResult != null) {
             BingResult.WebPages webPages = bingResult.getWebPages();
@@ -60,10 +63,11 @@ public class SearchUtils {
             items.addAll(collect);
         }
 
+        // 总体结果
         searchResult.setQueryContext(searchItem);
         searchResult.setTotal(total);
         searchResult.setCurrent(page);
-        searchResult.setItems(items);
+        searchResult.setItems(Lists.newArrayList(Sets.newHashSet(items)));
 
         return searchResult;
     }
