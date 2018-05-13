@@ -17,13 +17,12 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin("*")
 public class SearchController {
 
-
     @GetMapping
     public ApiResult<SearchResult> search(
-            @RequestParam(required = false, defaultValue = "") String kk,
+            @RequestParam(required = false, defaultValue = "") String q,
             @RequestParam(required = false, defaultValue = "1") int page
             ) {
-        SearchResult searchResult = SearchUtils.search(kk, page, 10);
+        SearchResult searchResult = SearchUtils.search(q, page, 10);
 
         return new ApiResult<>(searchResult);
     }
