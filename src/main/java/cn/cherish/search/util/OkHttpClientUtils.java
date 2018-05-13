@@ -11,17 +11,19 @@ import okhttp3.RequestBody;
  * @date 2018/4/26 1:16
  */
 public class OkHttpClientUtils {
-    private OkHttpClientUtils(){}
+    private OkHttpClientUtils() {
+    }
 
     private static final OkHttpClient client;
+    public static final String appJson = "application/json; charset=utf-8";
     public static final MediaType JSON
-            = MediaType.parse("application/json; charset=utf-8");
+            = MediaType.parse(appJson);
 
     static {
         client = new OkHttpClient();
     }
 
-    public static OkHttpClient defaultClient(){
+    public static OkHttpClient defaultClient() {
         return client;
     }
 
@@ -32,6 +34,7 @@ public class OkHttpClientUtils {
                 .post(body)
                 .build();
     }
+
     public static Request getReq(String url) {
         return new Request.Builder()
                 .url(url)

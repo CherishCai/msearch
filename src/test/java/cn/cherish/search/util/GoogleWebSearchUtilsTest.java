@@ -15,9 +15,5 @@ public class GoogleWebSearchUtilsTest {
         GoogleWebSearchUtils.search("GG", 1, 10);
     }
 
-    @Test
-    public void searchWeb() throws Exception {
-        GoogleWebSearchUtils.searchWeb("GG", 1, 10);
-    }
 
 }
