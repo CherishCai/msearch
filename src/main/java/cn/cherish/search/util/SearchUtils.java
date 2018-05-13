@@ -62,6 +62,7 @@ public class SearchUtils {
 
         searchResult.setQueryContext(searchItem);
         searchResult.setTotal(total);
+        searchResult.setCurrent(page);
         searchResult.setItems(items);
 
         return searchResult;
