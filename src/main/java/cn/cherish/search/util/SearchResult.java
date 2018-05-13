@@ -29,7 +29,7 @@ public class SearchResult {
     private List<Item> items;
 
     @Data
-    public static class Item {
+    public static class Item implements Comparable{
 
         @ApiModelProperty("来源搜索引擎")
         private String engine;
@@ -71,6 +71,15 @@ public class SearchResult {
                 result = 31 * result + link.hashCode();
             }
             return result;
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            Item item = (Item) o;
+            if (link != null && item.link != null) {
+                return link.compareTo(item.link);
+            }
+            return 0;
         }
     }
 }

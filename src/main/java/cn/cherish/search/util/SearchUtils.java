@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class SearchUtils {
 
-    private static final String google = "google";
+    private static final String google = "Google";
     private static final String biying = "必应";
 
     public static SearchResult search(String searchItem, int page, int count) {
@@ -72,7 +72,7 @@ public class SearchUtils {
         searchResult.setQueryContext(searchItem);
         searchResult.setTotal(total);
         searchResult.setCurrent(page);
-        searchResult.setItems(Lists.newArrayList(Sets.newHashSet(items)));
+        searchResult.setItems(Lists.newArrayList(Sets.newTreeSet(items)));
 
         return searchResult;
     }
