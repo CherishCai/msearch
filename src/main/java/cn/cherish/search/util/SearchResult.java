@@ -31,6 +31,9 @@ public class SearchResult {
     @Data
     public static class Item {
 
+        @ApiModelProperty("来源搜索引擎")
+        private String engine;
+
         @ApiModelProperty("标题")
         private String title;
         @ApiModelProperty("HTML标题")

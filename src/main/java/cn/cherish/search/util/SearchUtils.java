@@ -14,6 +14,10 @@ import java.util.stream.Collectors;
  * @date 2018/5/13 17:06
  */
 public class SearchUtils {
+
+    private static final String google = "google";
+    private static final String biying = "必应";
+
     public static SearchResult search(String searchItem, int page, int count) {
         SearchResult searchResult = new SearchResult();
         List<SearchResult.Item> items = new ArrayList<>();
@@ -29,8 +33,8 @@ public class SearchUtils {
 
             List<SearchResult.Item> collect = googleResult.getItems().stream().map(v -> {
                 SearchResult.Item item = new SearchResult.Item();
-
                 BeanUtils.copyProperties(v, item);
+                item.setEngine(google);
                 return item;
             }).collect(Collectors.toList());
 
@@ -57,6 +61,7 @@ public class SearchUtils {
                 item.setSnippet(v.getSnippet());
                 item.setHtmlSnippet(v.getSnippet());
 
+                item.setEngine(biying);
                 return item;
             }).collect(Collectors.toList());
 
