@@ -2,6 +2,7 @@ package cn.cherish.search.util;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
  * @version 1.0
  * @date 2018/5/13 17:06
  */
+@Slf4j
 public class SearchUtils {
 
     private static final String google = "Google";
@@ -69,11 +71,22 @@ public class SearchUtils {
         }
 
         // 总体结果
+        List<SearchResult.Item> list = Lists.newArrayList(Sets.newTreeSet(items));
+
+        // 相关性排序
+        try {
+            list = WordUtils.correlationOrdering(list, searchItem);
+        } catch (Exception e) {
+            log.error("相关性排序 error", e);
+        }
+
         searchResult.setQueryContext(searchItem);
         searchResult.setTotal(total);
         searchResult.setCurrent(page);
-        searchResult.setItems(Lists.newArrayList(Sets.newTreeSet(items)));
+        searchResult.setItems(list);
 
         return searchResult;
     }
+
+
 }
