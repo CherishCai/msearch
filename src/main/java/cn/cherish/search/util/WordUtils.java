@@ -51,12 +51,10 @@ public class WordUtils {
 
         Query query = parser.parse(keyword);
 
-        Sort sort1 = new Sort(new SortField[]
-                {
-                        //如果两个都没有注释，那么就是按照先按照相关度，然后按照id排序（相关度相同的情况下）
-                        SortField.FIELD_SCORE,//注释掉这个就是按照id排序
-//                        new SortField("postId", SortField.INT, false)//注释掉这个就是按照相关度排序
-                }
+        Sort sort1 = new Sort(
+                //如果两个都没有注释，那么就是按照先按照相关度，然后按照link排序（相关度相同的情况下）
+                SortField.FIELD_SCORE,//注释掉这个就是按照link排序
+                new SortField("link", SortField.STRING, false)//注释掉这个就是按照相关度排序
         );
 
 
