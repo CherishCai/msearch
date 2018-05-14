@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>search</title>
+
+    <!-- Bootstrap -->
+    <link href="style/bootstrap.min.css" rel="stylesheet">
+    <style>
+.container{
+  margin-top: 50px;
+}
+.btn{
+  width:100%!important;
+}
+.tips{
+  display: flex;
+  justify-content:space-around;
+}
+.tipsBox{
+  margin-top: 20px;
+  font-size: 16px;
+}
+.tipsBox a{
+  display: inline-block;;
+  max-width:19%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.resultBox{
+  width:100%;
+  margin-top: 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding-bottom: 50px;
+  position:relative;
+  min-height: 200px;
+}
+.pages{
+  position: absolute;
+  bottom:30px;
+  left:50%;
+  transform:translate(-50%);
+}
+.result{
+  width: 90%;
+  margin:0 auto;
+  padding:2% 0.5%;
+}
+.result a{
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+.pages{
+  display: flex;
+  justify-content:center;
+}
+.pages a{
+  margin-left: 20px;
+}
+.resultTitle{
+  font-size: 20px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.resultDesc{
+  font-size: 16px;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#prev,#next{
+  display: none;
+}
+.loading{
+  width: 32px;
+  height: 32px;
+  margin: 50px auto;
+}
+.fail{
+  width: 100%;
+  text-align: center;
+  font-size: 18px;
+  margin: 30px 0;
+}
+.bigTitle{
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+    </style>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+  <h3 class="bigTitle">元搜索引擎</h3>
+  <div class="search row">
+    <div class="col-md-10 col-sm-10 " >
+      <input type="text" class="form-control input-lg" placeholder="请输入你喜欢的内容吧！" id="input">
+    </div>
+    <div class="col-md-2 col-sm-2">
+      <button type="button" class="btn btn-success btn-lg" id="search">搜索</button>      
+    </div>
+  </div>
+  <div class="row tipsBox">
+    <div class="tips col-md-10" id="tips">
+    </div>
+  </div>
+
+  <div class="resultBox">
+      <div class="result" id="result">
+        <div class="fail">期待你的搜索</div>
+      </div>
+      <div class="pages" id="pages">
+        <a href="#" id="prev">上一页</a>
+        <a href="#" id="next">下一页</a>
+      </div>
+  </div>
+</div>
+<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script>
+$(function(){
+  var pages = 1;
+  if(!localStorage.arr){
+    localStorage.arr = "游戏,开发,玩游戏,美食,地铁"
+  }
+
+  var tipsArr = localStorage.arr.split(',')
+  showTips(tipsArr)
+  
+  $('#prev').click(function(){
+    pages--
+    showThePages()
+    searchFun( $('#input').val() , pages )
+  })
+
+  $('#next').click(function(){
+    pages++
+    showThePages()
+    searchFun( $('#input').val() , pages )
+  })
+
+  $('#tips').on('click','a',function(){
+    $('#next').show()
+    var value = $(this).text()
+    $('#input').val(value)
+    changeTips(value)
+    showTips(tipsArr)
+    pages = 1 
+    searchFun( value , pages )
+  })
+
+  $('#search').click(function(){
+    var value = $('#input').val()
+    $('#next').show()
+    changeTips(value)
+    showTips(tipsArr)
+    pages = 1 
+    searchFun( value , pages )
+  })
+
+  function showTips(tipsArr){
+    var tempStr = ''
+    tipsArr.forEach(function(el, index){
+      tempStr += '<a href="#">'+ el +'</a>'
+    })
+    $('#tips').html(tempStr)
+    localStorage.arr = tipsArr.join(',')
+  }
+  function changeTips(value){
+    if( tipsArr.indexOf(value) < 0 ){
+      tipsArr.pop()
+      tipsArr.unshift(value)
+    }
+  }
+  function searchFun(value , page){
+    if(value == ''){
+      alert('请输入搜索内容！')
+      return 
+    }
+    $('#result').html('<div class="loading"><img src="images/loading.png" alt=""></div>')
+    $.get('http://47.75.78.66:8888/search',{
+      'q':value ,
+      'page': page
+    },function(res){
+      if(res.code===200){
+        var data = res.data
+        var tempStr = ''
+        data.items.forEach(function(el , index){
+          tempStr += '<a href="'+ el.formattedUrl +'" class="resultLink"><h3 class="resultTitle">['+ el.engine +']'+ el.title +'</h3><p class="resultDesc">'+ el.snippet +'</p></a>'
+        })
+        $('#result').html(tempStr)
+      }else{
+        $('#result').html('<div class="fail">查询失败~~</div>')
+      }
+    })
+  }
+
+  function showThePages(){
+    if(pages==1){
+      $('#prev').hide()
+    }else{
+      $('#prev').show()
+    }
+  }
+})
+
+
+
+</script>
+  </body>
+</html>
