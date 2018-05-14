@@ -4,6 +4,7 @@ package cn.cherish.search.web;
 import cn.cherish.search.util.SearchResult;
 import cn.cherish.search.util.SearchUtils;
 import io.swagger.annotations.Api;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -22,6 +23,9 @@ public class SearchController {
             @RequestParam(required = false, defaultValue = "") String q,
             @RequestParam(required = false, defaultValue = "1") int page
             ) {
+        if (StringUtils.isBlank(q)) {
+            return new ApiResult<>(null);
+        }
         SearchResult searchResult = SearchUtils.search(q, page, 10);
 
         return new ApiResult<>(searchResult);
